@@ -10,7 +10,7 @@ class AdminPaymentPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Admin Payment Records'),
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: Colors.deepPurple.shade200,
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance

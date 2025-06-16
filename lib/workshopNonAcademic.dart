@@ -2,104 +2,186 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'workshopDetail.dart';
 
-class WorkshopNonAcademic extends StatelessWidget {
-  final void Function(int)? onTabChange;
-  const WorkshopNonAcademic({super.key, this.onTabChange});
+class WorkshopNonAcademic extends StatefulWidget {
+  const WorkshopNonAcademic({super.key});
+
+  @override
+  State<WorkshopNonAcademic> createState() => _WorkshopNonAcademicState();
+}
+
+class _WorkshopNonAcademicState extends State<WorkshopNonAcademic> {
+  String searchQuery = "";
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Non-Academic Workshop',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+      // appBar: AppBar(
+      //   title: const Text("SmartComp"),
+      //   backgroundColor: Colors.deepPurple.shade200,
+      //   actions: const [
+      //     Icon(Icons.shopping_cart),
+      //     SizedBox(width: 8),
+      //     Icon(Icons.notifications),
+      //     SizedBox(width: 8),
+      //     Icon(Icons.person),
+      //     SizedBox(width: 16),
+      //   ],
+      // ),
+      body: Column(
+        children: [
+          // Search bar
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: TextField(
+              onChanged: (val) =>
+                  setState(() => searchQuery = val.toLowerCase()),
+              decoration: InputDecoration(
+                hintText: 'Search for competition or workshop',
+                prefixIcon: const Icon(Icons.search),
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+              ),
             ),
-            const SizedBox(height: 12),
-            Expanded(
-              child: StreamBuilder<QuerySnapshot>(
-                stream: FirebaseFirestore.instance
-                    .collection('workshops')
-                    .where('category', isEqualTo: 'non-academic')
-                    .snapshots(),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
+          ),
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 8.0),
+            child: Text(
+              "Recommended Workshop and Competition from us\nAll the skills you need in one place",
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 14),
+            ),
+          ),
+          // Filter buttons (optional visual only)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                FilterChip(
+                    label: const Text("Academic"),
+                    selected: false,
+                    onSelected: (_) {}),
+                const SizedBox(width: 8),
+                FilterChip(
+                    label: const Text("Non-Academic"),
+                    selected: true,
+                    onSelected: (_) {}),
+              ],
+            ),
+          ),
+          const SizedBox(height: 10),
 
-                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                    return const Center(
-                        child: Text("Belum ada workshop academic."));
-                  }
+          // GridView for workshop cards
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('workshops')
+                  .where('category', isEqualTo: 'non-academic')
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData)
+                  return const Center(child: CircularProgressIndicator());
 
-                  final docs = snapshot.data!.docs;
+                final data = snapshot.data!.docs
+                    .where((doc) => doc['title']
+                        .toString()
+                        .toLowerCase()
+                        .contains(searchQuery))
+                    .toList();
 
-                  return GridView.builder(
-                    itemCount: docs.length,
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
-                      childAspectRatio: 0.75,
-                    ),
-                    itemBuilder: (context, index) {
-                      final data = docs[index].data() as Map<String, dynamic>;
+                return GridView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: data.length,
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    childAspectRatio: 0.72,
+                    crossAxisSpacing: 16,
+                    mainAxisSpacing: 16,
+                  ),
+                  itemBuilder: (context, index) {
+                    final doc = data[index];
+                    final title = doc['title'] ?? '';
+                    final image = doc['image'] ?? '';
+                    final type = doc['category'] ?? '';
+                    final price = doc['price'] ?? 0;
 
-                      return Card(
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => WorkshopDetail(
+                              docId: doc.id,
+                              workshop: doc.data() as Map<String, dynamic>,
+                            ),
+                          ),
+                        );
+                      },
+                      child: Card(
                         elevation: 3,
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
+                            borderRadius: BorderRadius.circular(15)),
                         child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             Expanded(
-                              child: Image.network(
-                                data['image'],
-                                width: double.infinity,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) =>
-                                    const Icon(Icons.broken_image, size: 60),
+                              child: ClipRRect(
+                                borderRadius: const BorderRadius.vertical(
+                                    top: Radius.circular(15)),
+                                child: Image.network(
+                                  image,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) =>
+                                      const Icon(Icons.broken_image, size: 60),
+                                ),
                               ),
                             ),
                             Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Text(
-                                data['title'],
+                                title,
                                 textAlign: TextAlign.center,
                                 style: const TextStyle(
                                     fontWeight: FontWeight.bold),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            ElevatedButton(
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => WorkshopDetail(
-                                      workshop: snapshot.data!.docs[index]
-                                          .data() as Map<String, dynamic>,
-                                      docId: snapshot.data!.docs[index]
-                                          .id, // tambahkan ini
+                            Padding(
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 8.0),
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => WorkshopDetail(
+                                        docId: doc.id,
+                                        workshop:
+                                            doc.data() as Map<String, dynamic>,
+                                      ),
                                     ),
-                                  ),
-                                );
-                              },
-                              child: const Text("Jelajahi"),
+                                  );
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.deepPurple.shade100,
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(25)),
+                                ),
+                                child: const Text("Jelajahi",
+                                    style: TextStyle(color: Colors.deepPurple)),
+                              ),
                             )
                           ],
                         ),
-                      );
-                    },
-                  );
-                },
-              ),
+                      ),
+                    );
+                  },
+                );
+              },
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

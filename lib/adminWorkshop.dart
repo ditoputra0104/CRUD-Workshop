@@ -50,7 +50,7 @@ class _AdminWorkshopPageState extends State<AdminWorkshopPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("Admin Workshop"),
-        backgroundColor: Colors.deepPurple,
+        backgroundColor: Colors.deepPurple.shade200,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -108,7 +108,7 @@ class _AdminWorkshopPageState extends State<AdminWorkshopPage> {
             ElevatedButton(
               onPressed: _addWorkshop,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.deepPurple,
+                backgroundColor: Colors.deepPurple.shade200,
                 padding:
                     const EdgeInsets.symmetric(horizontal: 30, vertical: 14),
                 shape: RoundedRectangleBorder(
