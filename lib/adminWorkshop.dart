@@ -9,10 +9,16 @@ class AdminWorkshopPage extends StatefulWidget {
 }
 
 class _AdminWorkshopPageState extends State<AdminWorkshopPage> {
-  final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _descController = TextEditingController();
-  final TextEditingController _priceController = TextEditingController();
-  final TextEditingController _imageController = TextEditingController();
+  final _titleController = TextEditingController();
+  final _descController = TextEditingController();
+  final _priceController = TextEditingController();
+  final _imageController = TextEditingController();
+  final _openRegistController = TextEditingController();
+  final _closeRegistController = TextEditingController();
+  final _competitionDayController = TextEditingController();
+  final _prize1Controller = TextEditingController();
+  final _prize2Controller = TextEditingController();
+  final _prize3Controller = TextEditingController();
 
   String _selectedCategory = 'academic';
   final List<String> _categories = ['academic', 'non-academic'];
@@ -25,6 +31,12 @@ class _AdminWorkshopPageState extends State<AdminWorkshopPage> {
         'price': int.tryParse(_priceController.text) ?? 0,
         'image': _imageController.text.trim(),
         'category': _selectedCategory,
+        'open_regist': _openRegistController.text.trim(),
+        'close_regist': _closeRegistController.text.trim(),
+        'competition_day': _competitionDayController.text.trim(),
+        'prize_1': _prize1Controller.text.trim(),
+        'prize_2': _prize2Controller.text.trim(),
+        'prize_3': _prize3Controller.text.trim(),
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -35,6 +47,13 @@ class _AdminWorkshopPageState extends State<AdminWorkshopPage> {
       _descController.clear();
       _priceController.clear();
       _imageController.clear();
+      _openRegistController.clear();
+      _closeRegistController.clear();
+      _competitionDayController.clear();
+      _prize1Controller.clear();
+      _prize2Controller.clear();
+      _prize3Controller.clear();
+
       setState(() {
         _selectedCategory = 'academic';
       });
@@ -43,6 +62,21 @@ class _AdminWorkshopPageState extends State<AdminWorkshopPage> {
         SnackBar(content: Text("Error: $e")),
       );
     }
+  }
+
+  Widget _buildTextField(String label, TextEditingController controller,
+      {TextInputType? inputType}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: TextField(
+        controller: controller,
+        keyboardType: inputType,
+        decoration: InputDecoration(
+          labelText: label,
+          border: const OutlineInputBorder(),
+        ),
+      ),
+    );
   }
 
   @override
@@ -56,49 +90,24 @@ class _AdminWorkshopPageState extends State<AdminWorkshopPage> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            TextField(
-              controller: _titleController,
-              decoration: const InputDecoration(
-                labelText: "Workshop Title",
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _descController,
-              decoration: const InputDecoration(
-                labelText: "Description",
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _priceController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: "Price",
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _imageController,
-              decoration: const InputDecoration(
-                labelText: "Image URL",
-                border: OutlineInputBorder(),
-              ),
-            ),
+            _buildTextField("Workshop Title", _titleController),
+            _buildTextField("Description", _descController),
+            _buildTextField("Price", _priceController,
+                inputType: TextInputType.number),
+            _buildTextField("Image URL", _imageController),
+            _buildTextField("Open Registration", _openRegistController),
+            _buildTextField("Close Registration", _closeRegistController),
+            _buildTextField("Competition Day", _competitionDayController),
+            _buildTextField("Prize Juara 1", _prize1Controller),
+            _buildTextField("Prize Juara 2", _prize2Controller),
+            _buildTextField("Prize Juara 3", _prize3Controller),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
               value: _selectedCategory,
-              items: _categories.map((cat) {
-                return DropdownMenuItem(value: cat, child: Text(cat));
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  _selectedCategory = value!;
-                });
-              },
+              items: _categories
+                  .map((cat) => DropdownMenuItem(value: cat, child: Text(cat)))
+                  .toList(),
+              onChanged: (val) => setState(() => _selectedCategory = val!),
               decoration: const InputDecoration(
                 labelText: "Category",
                 border: OutlineInputBorder(),
